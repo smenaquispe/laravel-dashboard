@@ -18,4 +18,13 @@ class ClientTest extends TestCase
         $this->assertNotNull($client);
         $this->assertInstanceOf(Client::class, $client);
     }
+
+    public function test_client_get_list_clients()
+    {
+        Client::factory()->count(5)->create();
+    
+        $response = $this->get('/api/clients');
+        
+        $response->assertStatus(200);
+    }
 }
