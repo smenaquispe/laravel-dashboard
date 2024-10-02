@@ -8,6 +8,10 @@ use Illuminate\Http\Request;
 use App\Models\Client;
 use App\Services\ClientService;
 use App\Exceptions\ClientListIsEmpty;
+use App\Exceptions\OutsideWorkingHours;
+use App\Exceptions\ApiRequestFailed;
+
+use Illuminate\Support\Facades\Http;
 
 class ClientController extends Controller
 {
@@ -32,9 +36,9 @@ class ClientController extends Controller
     {
         try {
             $clients = $this->clientService->getAllClients();
-            return response()->json($clients);
+            return view('clients', ['clients' => $clients]);        
         } catch (ClientListIsEmpty $e) {
-            return response()->json(['message' => 'No clients found'], 404);
-        }
+            return view('clients', ['clients' => [], 'message' => 'No clients found.']);
+        } 
     }
 }
