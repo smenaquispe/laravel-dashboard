@@ -30,6 +30,11 @@ class ClientController extends Controller
 
     public function showView()
     {
-        return view('clients');
+        try {
+            $clients = $this->clientService->getAllClients();
+            return response()->json($clients);
+        } catch (ClientListIsEmpty $e) {
+            return response()->json(['message' => 'No clients found'], 404);
+        }
     }
 }
