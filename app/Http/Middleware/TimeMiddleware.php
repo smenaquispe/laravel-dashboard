@@ -18,7 +18,7 @@ class TimeMiddleware
     public function handle(Request $request, Closure $next)
     {
         $startTime = Carbon::createFromTime(9, 0, 0);
-        $endTime = Carbon::createFromTime(18, 0, 0);
+        $endTime = Carbon::createFromTime(21, 0, 0);
     
         $now = Carbon::now();
     

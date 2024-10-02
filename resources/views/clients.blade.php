@@ -4,44 +4,133 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clientes</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
 </head>
-<body class="bg-gray-100">
-    <div class="container mx-auto mt-10">
-        <h1 class="text-2xl font-bold mb-5">Lista de Clientes</h1>
-        
-        @if(!empty($message))
-            <div class="bg-red-200 text-red-800 p-4 rounded mb-4">
-                {{ $message }}
-            </div>
-        @endif
+<body>
+    <h1>Clientes</h1>
 
-        @if(count($clients) > 0)
-            <table class="min-w-full bg-white">
-                <thead>
-                    <tr class="bg-gray-200 text-gray-600 uppercase text-sm">
-                        <th class="py-2 px-4 text-left">Nombre</th>
-                        <th class="py-2 px-4 text-left">Edad</th>
-                        <th class="py-2 px-4 text-left">Ciudad</th>
-                        <th class="py-2 px-4 text-left">Salario</th>
+    <!-- Tabla de clientes -->
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Edad</th>
+                <th>Ciudad</th>
+                <th>Salario</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!empty($clients))
+                @foreach ($clients as $client)
+                    <tr>
+                        <td>{{ $client['name'] }}</td>
+                        <td>{{ $client['age'] }}</td>
+                        <td>{{ $client['city'] }}</td>
+                        <td>{{ $client['salary'] }}</td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach($clients as $client)
-                        <tr class="border-b">
-                            <td class="py-2 px-4">{{ $client['name'] }}</td>
-                            <td class="py-2 px-4">{{ $client['age'] }}</td>
-                            <td class="py-2 px-4">{{ $client['city'] }}</td>
-                            <td class="py-2 px-4">{{ $client['salary'] }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @else
-            <div class="p-4 bg-gray-200 rounded">
-                No clients available.
-            </div>
-        @endif
+                @endforeach
+            @else
+                <tr>
+                    <td colspan="4">No se encontraron clientes.</td>
+                </tr>
+            @endif
+        </tbody>
+    </table>
+
+    <!-- Gráfico de barras: Edad vs. Salario -->
+    <div>
+        <h2>Gráfico de barras: Edad vs. Salario</h2>
+        <canvas id="ageSalaryChart"></canvas>
     </div>
+    
+    <!-- Gráfico circular: Cantidad de personas por ciudad -->
+    <div>
+        <h2>Gráfico circular: Cantidad de personas por ciudad</h2>
+        <canvas id="cityChart"></canvas>
+    </div>
+
+    <script>
+        // Datos de los clientes
+        const clients = @json($clients);
+
+        // Datos para el gráfico de barras (Edad vs Salario)
+        const ages = clients.map(client => client.age);
+        const salaries = clients.map(client => client.salary);
+
+        const ctxBar = document.getElementById('ageSalaryChart').getContext('2d');
+        const ageSalaryChart = new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: ages,
+                datasets: [{
+                    label: 'Salario',
+                    data: salaries,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Datos para el gráfico circular (Cantidad de personas por ciudad)
+        const cityCounts = {};
+        clients.forEach(client => {
+            cityCounts[client.city] = (cityCounts[client.city] || 0) + 1;
+        });
+
+        const cityLabels = Object.keys(cityCounts);
+        const cityData = Object.values(cityCounts);
+
+        const ctxPie = document.getElementById('cityChart').getContext('2d');
+        const cityChart = new Chart(ctxPie, {
+            type: 'pie',
+            data: {
+                labels: cityLabels,
+                datasets: [{
+                    label: 'Cantidad de Personas por Ciudad',
+                    data: cityData,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            }
+        });
+    </script>
 </body>
 </html>
